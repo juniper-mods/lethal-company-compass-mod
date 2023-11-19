@@ -31,34 +31,40 @@ namespace MyFirstPlugin
             furthest_extent_left = points.First().anchoredPosition.x;
             furthest_extent_right = points.Last().anchoredPosition.x;
             gap = points.First.Next.Value.anchoredPosition.x  - points.First().anchoredPosition.x;
+            RotateRight(gap*2.5f);
         }
 
           // Update is called once per frame
         void Update()
         {
-            if (i % 250 == 0)
+            var r = GameNetworkManager.Instance.localPlayerController.transform.eulerAngles.y;
+            if (float.IsNaN(previous_r))
             { 
-                if (i == 500) {
-                    left_rotation = !left_rotation;
-                    i = 0;
+                previous_r = r;
+                return;
                 }
                 
-                if (TurningLeft())
+            var delta = previous_r - r;
+            var adj_delta = Math.Abs(delta / 90) * gap;
+            Debug.Log(String.Format("Delta: {0} - Adj: {1}", delta, adj_delta));
+
+            if ( delta < 0) 
                 {
-                    RotateLeft(gap*123);
+                RotateLeft(adj_delta);
                 }
                 else
                 {
-                    RotateRight(gap * 123);
+                RotateRight(adj_delta);
                 }
-            }
-            i += 1;
+
+            previous_r = r;
             if (!Moving()) { return; }
 
         }
 
         void RotateLeft(float amount)
         {
+            if (amount == 0) { return; }
             foreach (RectTransform p in points)
             {
                 p.anchoredPosition += Vector2.left * amount; // * Time.deltaTime;
@@ -83,6 +89,7 @@ namespace MyFirstPlugin
         }
         void RotateRight(float amount)
         {
+            if (amount == 0) { return; }
             foreach (RectTransform p in points)
             {
                 p.anchoredPosition += Vector2.right * amount; // * Time.deltaTime;
