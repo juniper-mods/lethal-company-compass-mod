@@ -1,3 +1,7 @@
+Requires:
+* Install [BepInEx](https://github.com/BepInEx/BepInEx)
+* [LC_API](https://thunderstore.io/c/lethal-company/p/2018/LC_API/)
+
 # lethal-company-compass-mod
 ![example](Lethal_Company_vCEgxDvTpS.gif)
 
