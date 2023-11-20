@@ -11,6 +11,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.UIElements;
+using static UnityEngine.UI.Image;
 
 
 
@@ -22,11 +23,12 @@ namespace MyFirstPlugin
         public LinkedList<RectTransform> points;
 
         private bool left_rotation = true;
-        private int i = 0;
 
         private float furthest_extent_left;
         private float furthest_extent_right;
         private float gap;
+        private const float north = 89f;
+        private bool initial_setup = false;
 
         public void Load(LinkedList<RectTransform> points)
         {
@@ -34,12 +36,30 @@ namespace MyFirstPlugin
             furthest_extent_left = points.First().anchoredPosition.x;
             furthest_extent_right = points.Last().anchoredPosition.x;
             gap = points.First.Next.Value.anchoredPosition.x  - points.First().anchoredPosition.x;
-            RotateRight(gap*2.5f);
         }
         private float previous_r = float.NaN;
-          // Update is called once per frame
+
         void Update()
         {
+            if (!initial_setup)
+            {
+                try
+                {
+                    var camera_delta = north - GameNetworkManager.Instance.localPlayerController.cameraContainerTransform.eulerAngles.y; // angle delta
+                    // Angle to pixels
+                    var offset = Math.Abs(camera_delta / 90) * gap;
+                    if (camera_delta < 0)
+                    {
+                        RotateLeft(offset);
+                    }
+                    else
+                    {
+                        RotateRight(offset);
+                    }
+                }
+                catch (Exception ex) { return; }
+                initial_setup = true;
+            }
             var r = GameNetworkManager.Instance.localPlayerController.transform.eulerAngles.y;
             if (float.IsNaN(previous_r))
             {
@@ -49,7 +69,6 @@ namespace MyFirstPlugin
 
             var delta = previous_r - r;
             var adj_delta = Math.Abs(delta / 90) * gap;
-            Debug.Log(String.Format("Delta: {0} - Adj: {1}", delta, adj_delta));
 
             if ( delta < 0) 
             {
@@ -61,8 +80,6 @@ namespace MyFirstPlugin
             }
 
             previous_r = r;
-            if (!Moving()) { return; }
-
         }
 
         void RotateLeft(float amount)
@@ -115,9 +132,6 @@ namespace MyFirstPlugin
                 if (!extent) break;
             }
         }
-
-        bool Moving() { return true; }
-        bool TurningLeft() {  return left_rotation; }
     }
 
     [BepInPlugin(PluginInfo.PLUGIN_GUID, PluginInfo.PLUGIN_NAME, PluginInfo.PLUGIN_VERSION)]
@@ -133,33 +147,47 @@ namespace MyFirstPlugin
         {
             logger = Logger;
             Logger.LogInfo($"Plugin {PluginInfo.PLUGIN_GUID} is loaded!");
-            var harmonymain = new Harmony(PluginInfo.PLUGIN_GUID);
-            harmonymain.PatchAll();
+            var harmony = new Harmony(PluginInfo.PLUGIN_GUID);
+            harmony.Patch(typeof(HUDManager).GetMethod("OnEnable", BindingFlags.Public | BindingFlags.Static | BindingFlags.Instance | BindingFlags.NonPublic), postfix: new HarmonyMethod(typeof(Patch).GetMethod("Start")));
+            harmony.Patch(typeof(HUDManager).GetMethod("OnDisable", BindingFlags.Public | BindingFlags.Static | BindingFlags.Instance | BindingFlags.NonPublic), postfix: new HarmonyMethod(typeof(Patch).GetMethod("End")));
+            harmony.Patch(typeof(HUDManager).GetMethod("HideHUD", BindingFlags.Public | BindingFlags.Static | BindingFlags.Instance | BindingFlags.NonPublic), postfix: new HarmonyMethod(typeof(Patch).GetMethod("Toggle")));
             LC_API.BundleAPI.BundleLoader.OnLoadedAssets += () => {
                 Logger.LogInfo($"Plugin {PluginInfo.PLUGIN_GUID}->OnLoadedAssets is called!");
                 compass = LC_API.BundleAPI.BundleLoader.GetLoadedAsset<GameObject>("assets/canvas.prefab");
             };
         }
 
-        [HarmonyPatch(typeof(StartOfRound), nameof(StartOfRound.openingDoorsSequence))]
+        
         class Patch
         {
-            static void Prefix()
+            public static void Start()
             {
+                logger.LogError("Called Start");
                 Render();
+            }
+            public static void End()
+            {
+                logger.LogError("Called End");
+                if (instance != null)
+                {
+                    Destroy(instance);
+                }
+            }
+            public static void Toggle(bool hide)
+            {
+                if (hide)
+                {
+                    End();
+                }
+                else
+                {
+                    Start();
+                }
             }
         }
 
-  /*      [HarmonyPatch(typeof(StartOfRound), nameof(StartOfRound.openingDoorsSequence))]
-        [HarmonyPrefix]
-        public static void openingDoorsSequence()
-        {
-            Render();
-        }*/
-
         static void Render()
         {
-            Debug.LogError("RENDER HAS BEEN CALLED");
             var _compass = UnityEngine.Object.Instantiate(compass);
             _compass.layer = LayerMask.NameToLayer("UI");
             var bounding_box = _compass.transform.Find("Image").GetChild(0).gameObject;
