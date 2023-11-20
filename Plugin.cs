@@ -15,19 +15,17 @@ using static UnityEngine.UI.Image;
 
 
 
-namespace MyFirstPlugin
+namespace Compass
 {
 
     public class NewBehaviourScript : MonoBehaviour
     {
         public LinkedList<RectTransform> points;
 
-        private bool left_rotation = true;
-
         private float furthest_extent_left;
         private float furthest_extent_right;
         private float gap;
-        private const float north = 89f;
+        private const float north = 359f;
         private bool initial_setup = false;
 
         public void Load(LinkedList<RectTransform> points)
@@ -141,19 +139,17 @@ namespace MyFirstPlugin
     {
         static GameObject compass;
         static GameObject instance;
-        static BepInEx.Logging.ManualLogSource logger;
          
         void Awake()
         {
-            logger = Logger;
             Logger.LogInfo($"Plugin {PluginInfo.PLUGIN_GUID} is loaded!");
             var harmony = new Harmony(PluginInfo.PLUGIN_GUID);
-            harmony.Patch(typeof(HUDManager).GetMethod("OnEnable", BindingFlags.Public | BindingFlags.Static | BindingFlags.Instance | BindingFlags.NonPublic), postfix: new HarmonyMethod(typeof(Patch).GetMethod("Start")));
+            harmony.Patch(typeof(HUDManager).GetMethod("OnEnable",  BindingFlags.Public | BindingFlags.Static | BindingFlags.Instance | BindingFlags.NonPublic), postfix: new HarmonyMethod(typeof(Patch).GetMethod("Start")));
             harmony.Patch(typeof(HUDManager).GetMethod("OnDisable", BindingFlags.Public | BindingFlags.Static | BindingFlags.Instance | BindingFlags.NonPublic), postfix: new HarmonyMethod(typeof(Patch).GetMethod("End")));
-            harmony.Patch(typeof(HUDManager).GetMethod("HideHUD", BindingFlags.Public | BindingFlags.Static | BindingFlags.Instance | BindingFlags.NonPublic), postfix: new HarmonyMethod(typeof(Patch).GetMethod("Toggle")));
+            harmony.Patch(typeof(HUDManager).GetMethod("HideHUD",   BindingFlags.Public | BindingFlags.Static | BindingFlags.Instance | BindingFlags.NonPublic), postfix: new HarmonyMethod(typeof(Patch).GetMethod("Toggle")));
             LC_API.BundleAPI.BundleLoader.OnLoadedAssets += () => {
                 Logger.LogInfo($"Plugin {PluginInfo.PLUGIN_GUID}->OnLoadedAssets is called!");
-                compass = LC_API.BundleAPI.BundleLoader.GetLoadedAsset<GameObject>("assets/canvas.prefab");
+                compass = LC_API.BundleAPI.BundleLoader.GetLoadedAsset<GameObject>("assets/LineCompassPlugin/Compass.prefab");
             };
         }
 
@@ -162,12 +158,10 @@ namespace MyFirstPlugin
         {
             public static void Start()
             {
-                logger.LogError("Called Start");
                 Render();
             }
             public static void End()
             {
-                logger.LogError("Called End");
                 if (instance != null)
                 {
                     Destroy(instance);

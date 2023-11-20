@@ -1,9 +1,9 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.30114.105
+# Visual Studio Version 17
+VisualStudioVersion = 17.8.34309.116
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MyFirstPlugin", "MyFirstPlugin.csproj", "{B04ABD58-5251-4A35-85E3-AC83CB4B6A14}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Compass", "Compass.csproj", "{B04ABD58-5251-4A35-85E3-AC83CB4B6A14}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -13,9 +13,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 		Release|x64 = Release|x64
 		Release|x86 = Release|x86
-	EndGlobalSection
-	GlobalSection(SolutionProperties) = preSolution
-		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{B04ABD58-5251-4A35-85E3-AC83CB4B6A14}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
@@ -30,5 +27,8 @@ Global
 		{B04ABD58-5251-4A35-85E3-AC83CB4B6A14}.Release|x64.Build.0 = Release|Any CPU
 		{B04ABD58-5251-4A35-85E3-AC83CB4B6A14}.Release|x86.ActiveCfg = Release|Any CPU
 		{B04ABD58-5251-4A35-85E3-AC83CB4B6A14}.Release|x86.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
 	EndGlobalSection
 EndGlobal
