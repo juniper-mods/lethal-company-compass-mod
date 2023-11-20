@@ -1,3 +1,6 @@
+# Comments \ issues
+Discord: birdofjustice
+
 Requires:
 * Install [BepInEx](https://github.com/BepInEx/BepInEx)
 * [LC_API](https://thunderstore.io/c/lethal-company/p/2018/LC_API/)
